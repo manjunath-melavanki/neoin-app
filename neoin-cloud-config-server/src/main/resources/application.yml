@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: neoin-config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/manjunath-melavanki/neoin-configurations
+          search-paths: '{application}'
+          clone-on-start: true
+          default-label: main
+server:
+  port: 8888
+  servlet:
+    context-path: /config

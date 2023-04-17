@@ -1,0 +1,43 @@
+version: "3.5"
+services:
+
+  neo1:
+    image: neo:latest
+    environment:
+      - "spring.profiles.active=dev"
+      - "MYSQL_HOST=mysql"
+      - "CONFIG_SERVER=cloud-config-server"
+    ports:
+      - "8081:8081"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  
+  neo2:
+    image: neo:latest
+    environment:
+      - "spring.profiles.active=dev"
+      - "MYSQL_HOST=mysql"
+      - "CONFIG_SERVER=cloud-config-server"
+    ports:
+      - "8082:8082"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  
+  neo3:
+    image: neo:latest
+    environment:
+      - "spring.profiles.active=dev"
+      - "MYSQL_HOST=mysql"
+      - "CONFIG_SERVER=cloud-config-server"
+    ports:
+      - "8083:8083"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+
+networks:
+  default:
+    name: neo-net
+    external: true  

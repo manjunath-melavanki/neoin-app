@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: neo
+  config:
+    import: configserver:http://${CONFIG_SERVER:localhost}:8888/config?fail-fast=true&max-attempts=10&max-interval=1500&multiplier=1.2&initial-interval=1100
+  cloud:
+    config:
+      label: main
+  profiles:
+    active: local

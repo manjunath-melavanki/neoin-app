@@ -1,0 +1,125 @@
+import org.jooq.codegen.GenerationTool
+
+buildscript {
+    ext {
+        springBootVersion = '2.7.5'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.jooq:jooq-codegen:3.14.4")
+        classpath 'mysql:mysql-connector-java:8.0.22'
+        classpath("javax.xml.bind:jaxb-api:2.3.1")
+        classpath 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+        classpath 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+        classpath 'javax.xml.bind:jaxb-api:2.3.1'
+        classpath 'com.sun.xml.bind:jaxb-impl:2.3.1'
+        classpath 'org.javassist:javassist:3.25.0-GA'
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
+}
+
+group = 'com.neoin'
+version = '0.0.1'
+sourceCompatibility = '11   '
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2021.0.4")
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.2'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.6'
+    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.1'
+    implementation 'org.javassist:javassist:3.25.0-GA'
+    /*implementation 'org.springframework.boot:spring-boot-starter-log4j2'*/
+    runtimeOnly 'mysql:mysql-connector-java'
+    compileOnly 'org.springframework.boot:spring-boot-starter-jooq'
+    implementation "org.jooq:jooq:3.14.4"
+    implementation "org.jooq:jooq-meta:3.14.4"
+    implementation "org.jooq:jooq-codegen:3.14.4"
+    compileOnly 'org.jooq:jooq-codegen:3.9.2'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+task generate {
+    doLast {
+        def writer = new StringWriter()
+        def xml = new groovy.xml.MarkupBuilder(writer)
+                .configuration('xmlns': 'http://www.jooq.org/xsd/jooq-codegen-3.14.0.xsd') {
+                    jdbc() {
+                        driver('com.mysql.cj.jdbc.Driver')
+                        url('jdbc:mysql://127.0.0.1:3306/neoin?autoReconnect=true')
+                        user('root')
+                        password('root')
+                    }
+                    generator() {
+                        database() {
+                            inputSchema('neoin')
+                            includes('vendor|discount|vendor_category|vendor_category_map|vendor_group|' +
+                                    'product')
+                            outputSchemaToDefault(true)
+                            forcedTypes() {
+                                forcedType() {
+                                    name('BOOLEAN')
+                                    includeTypes('(?i:TINYINT\\(1\\))')
+                                }
+                            }
+                        }
+                        generate([:]) {
+                            pojos false
+                            daos false
+                        }
+                        target() {
+                            packageName('com.neoin.shop.jooq')
+                            directory("${projectDir}/src/main/java")
+                        }
+                    }
+                }
+        GenerationTool.generate(writer.toString())
+    }
+}
+
+tasks.named('wrapper') {
+    distributionType = Wrapper.DistributionType.ALL
+}
