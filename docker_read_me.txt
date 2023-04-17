@@ -1,3 +1,7 @@
+inside each folder run
+
+ ./gradlew clean build   
+ docker build --tag=<app-name>:latest .
  
 docker network create neo-net
  
